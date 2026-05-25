@@ -32,14 +32,15 @@ function aimAt(place: Place, compassRoot: HTMLElement, dirBtn: HTMLAnchorElement
   if (!live) setNeedle(compassRoot, bearing); // static: north-up, needle = absolute bearing
 }
 
-function showResults(places: Place[]): void {
+function showResults(places: Place[], headingGranted: boolean): void {
   if (stopHeading) { stopHeading(); stopHeading = null; }
+  live = false;
 
   app.innerHTML = `
     <main class="screen results">
       <div class="compass-host"></div>
       <a class="primary directions" target="_blank" rel="noopener">Get Directions →</a>
-      ${live ? "" : '<p class="static-note">Compass unavailable — arrow shows direction from North.</p>'}
+      <p class="static-note">Compass unavailable — arrow shows direction from North.</p>
       <div class="sheet">
         <div class="sheet-handle"></div>
         <div class="list"></div>
@@ -49,13 +50,17 @@ function showResults(places: Place[]): void {
   const compassRoot = app.querySelector<HTMLElement>(".compass-host")!;
   const dirBtn = app.querySelector<HTMLAnchorElement>(".directions")!;
   const listRoot = app.querySelector<HTMLElement>(".list")!;
+  const note = app.querySelector<HTMLElement>(".static-note")!;
 
   mountCompass(compassRoot);
   aimAt(places[0], compassRoot, dirBtn);
   renderList(listRoot, places, (place) => aimAt(place, compassRoot, dirBtn));
 
-  if (live) {
+  // Many desktop browsers expose DeviceOrientationEvent but never fire it (no sensor).
+  // So we stay static until a real heading actually arrives, then upgrade to live.
+  if (headingGranted) {
     stopHeading = watchHeading((heading) => {
+      if (!live) { live = true; note.remove(); }
       setNeedle(compassRoot, relativeAngle(initialBearingDeg(userPos, targetLatLng()), heading));
     });
   }
@@ -63,7 +68,8 @@ function showResults(places: Place[]): void {
 
 async function start(): Promise<void> {
   renderMessage(app, { title: "Locating…", body: "Getting your position." });
-  live = isOrientationSupported() && (await requestHeadingPermission());
+  // Request iOS motion permission now, while still inside the user-gesture (the landing tap).
+  const headingGranted = isOrientationSupported() && (await requestHeadingPermission());
 
   try {
     userPos = await getCurrentPosition();
@@ -91,7 +97,7 @@ async function start(): Promise<void> {
       });
       return;
     }
-    showResults(places);
+    showResults(places, headingGranted);
   } catch {
     renderMessage(app, {
       title: "Couldn't reach the locator",
