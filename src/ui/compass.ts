@@ -18,17 +18,23 @@ function ringPath(): string {
   return d;
 }
 
+// Mirrors the favicon: red north arm, gray south arm, navy center hub. The
+// needle group rotates around the center; the ring and hub stay fixed.
 export function mountCompass(root: HTMLElement): void {
   root.innerHTML = `
     <div class="compass" role="img" aria-label="Compass pointing to the nearest Premium">
-      <svg class="compass-ring" viewBox="0 0 512 512" aria-hidden="true">
-        <path d="${ringPath()}" fill="#c8102e" fill-rule="evenodd"/>
+      <svg class="compass-svg" viewBox="0 0 512 512" aria-hidden="true">
+        <path class="compass-ring" d="${ringPath()}" fill="#c8102e" fill-rule="evenodd"/>
+        <g class="needle">
+          <polygon points="256,120 290,256 222,256" fill="#c8102e"/>
+          <polygon points="256,392 290,256 222,256" fill="#d9dde3"/>
+        </g>
+        <circle cx="256" cy="256" r="16" fill="#16233a" stroke="#ffffff" stroke-width="4"/>
       </svg>
-      <div class="needle"></div>
     </div>`;
 }
 
 export function setNeedle(root: HTMLElement, rotationDeg: number): void {
-  const needle = root.querySelector<HTMLElement>(".needle");
-  if (needle) needle.style.transform = `translate(-50%, -100%) rotate(${rotationDeg}deg)`;
+  const needle = root.querySelector<SVGGElement>(".needle");
+  if (needle) needle.style.transform = `rotate(${rotationDeg}deg)`;
 }
