@@ -11,3 +11,6 @@ cdk.context.json
 
 # macOS
 .DS_Store
+
+# tooling artifacts
+.playwright-mcp/
