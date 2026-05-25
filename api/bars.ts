@@ -36,7 +36,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
     const xml = await upstream.text();
     const places = parseLocations(xml);
     const body: BarsResponse = { origin: { lat, lng }, count: places.length, places };
-    res.setHeader("Cache-Control", "public, s-maxage=3600, stale-while-revalidate=86400");
+    res.setHeader("Cache-Control", "public, s-maxage=3600, max-age=0, must-revalidate");
     res.status(200).json(body);
   } catch {
     res.status(502).json({ error: "failed to reach upstream locator" });

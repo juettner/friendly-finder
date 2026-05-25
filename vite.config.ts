@@ -24,7 +24,7 @@ export default defineConfig({
           {
             urlPattern: ({ url }) => url.pathname.startsWith("/api/bars"),
             handler: "NetworkFirst",
-            options: { cacheName: "bars-api", networkTimeoutSeconds: 8 },
+            options: { cacheName: "bars-api-v2", networkTimeoutSeconds: 8 },
           },
         ],
       },

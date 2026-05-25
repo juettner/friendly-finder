@@ -52,7 +52,7 @@ export async function handler(event: FunctionUrlEvent): Promise<FunctionUrlResul
     const xml = await upstream.text();
     const places = parseLocations(xml);
     const body: BarsResponse = { origin: { lat, lng }, count: places.length, places };
-    return json(200, body, { "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=86400" });
+    return json(200, body, { "Cache-Control": "public, s-maxage=3600, max-age=0, must-revalidate" });
   } catch {
     return json(502, { error: "failed to reach upstream locator" });
   } finally {
