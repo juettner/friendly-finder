@@ -35,6 +35,8 @@ export function mountCompass(root: HTMLElement): void {
 }
 
 export function setNeedle(root: HTMLElement, rotationDeg: number): void {
+  // SVG transform attribute (not CSS transform): rotates reliably on iOS Safari,
+  // where CSS transform-box on an SVG <g> does not apply.
   const needle = root.querySelector<SVGGElement>(".needle");
-  if (needle) needle.style.transform = `rotate(${rotationDeg}deg)`;
+  if (needle) needle.setAttribute("transform", `rotate(${rotationDeg} 256 256)`);
 }

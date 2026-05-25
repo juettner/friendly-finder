@@ -11,10 +11,11 @@ describe("compass UI", () => {
     expect(root.querySelector(".needle")).not.toBeNull();
   });
 
-  it("rotates the needle", () => {
+  it("rotates the needle around the compass center via the SVG transform attribute", () => {
     const root = document.createElement("div");
     mountCompass(root);
     setNeedle(root, 90);
-    expect((root.querySelector(".needle") as HTMLElement).style.transform).toContain("rotate(90deg)");
+    // SVG attribute (not CSS transform) so it rotates reliably on iOS Safari.
+    expect(root.querySelector(".needle")!.getAttribute("transform")).toBe("rotate(90 256 256)");
   });
 });
