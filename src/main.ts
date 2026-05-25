@@ -3,13 +3,13 @@ import type { LatLng, Place } from "../lib/types";
 import { getCurrentPosition, GeoError } from "./geo";
 import { fetchNearbyPlaces } from "./client";
 import { directionsUrl } from "./directions";
-import { initialBearingDeg, relativeAngle } from "./bearing";
+import { degToCardinal, initialBearingDeg, relativeAngle } from "./bearing";
 import {
   isOrientationSupported,
   requestHeadingPermission,
   watchHeading,
 } from "./heading";
-import { mountCompass, setNeedle, setTarget } from "./ui/compass";
+import { mountCompass, setNeedle } from "./ui/compass";
 import { renderList } from "./ui/sheet";
 import { renderLanding, renderMessage } from "./ui/screens";
 
@@ -24,10 +24,17 @@ function targetLatLng(): LatLng {
   return { lat: target.lat, lng: target.lng };
 }
 
-function aimAt(place: Place, compassRoot: HTMLElement, dirBtn: HTMLAnchorElement): void {
+function aimAt(
+  place: Place,
+  compassRoot: HTMLElement,
+  dirBtn: HTMLAnchorElement,
+  nameEl: HTMLElement,
+  metaEl: HTMLElement,
+): void {
   target = place;
   const bearing = initialBearingDeg(userPos, targetLatLng());
-  setTarget(compassRoot, place, bearing);
+  nameEl.textContent = place.name;
+  metaEl.textContent = `${place.distanceMiles.toFixed(1)} mi · ${degToCardinal(bearing)}`;
   dirBtn.href = directionsUrl(place, navigator.userAgent);
   if (!live) setNeedle(compassRoot, bearing); // static: north-up, needle = absolute bearing
 }
@@ -39,6 +46,10 @@ function showResults(places: Place[], headingGranted: boolean): void {
   app.innerHTML = `
     <main class="screen results">
       <div class="compass-host"></div>
+      <div class="target">
+        <h2 class="target-name"></h2>
+        <p class="target-meta"></p>
+      </div>
       <a class="primary directions" target="_blank" rel="noopener">Get Directions →</a>
       <p class="static-note">Compass unavailable — arrow shows direction from North.</p>
       <div class="sheet">
@@ -48,13 +59,15 @@ function showResults(places: Place[], headingGranted: boolean): void {
     </main>`;
 
   const compassRoot = app.querySelector<HTMLElement>(".compass-host")!;
+  const nameEl = app.querySelector<HTMLElement>(".target-name")!;
+  const metaEl = app.querySelector<HTMLElement>(".target-meta")!;
   const dirBtn = app.querySelector<HTMLAnchorElement>(".directions")!;
   const listRoot = app.querySelector<HTMLElement>(".list")!;
   const note = app.querySelector<HTMLElement>(".static-note")!;
 
   mountCompass(compassRoot);
-  aimAt(places[0], compassRoot, dirBtn);
-  renderList(listRoot, places, (place) => aimAt(place, compassRoot, dirBtn));
+  aimAt(places[0], compassRoot, dirBtn, nameEl, metaEl);
+  renderList(listRoot, places, (place) => aimAt(place, compassRoot, dirBtn, nameEl, metaEl));
 
   // Many desktop browsers expose DeviceOrientationEvent but never fire it (no sensor).
   // So we stay static until a real heading actually arrives, then upgrade to live.

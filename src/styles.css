@@ -50,12 +50,9 @@ body { margin: 0; background: var(--bg); min-height: 100dvh; display: flex; flex
   border-bottom: calc(min(78vw, 320px) * 0.42) solid var(--red);
   transition: transform 120ms linear;
 }
-.compass-center {
-  position: absolute; inset: 0; display: flex; flex-direction: column;
-  align-items: center; justify-content: center; text-align: center; pointer-events: none;
-}
-.place-name { font-size: 1rem; }
-.place-meta { font-size: 0.85rem; color: var(--muted); margin-top: 4px; }
+.target { text-align: center; padding: 0 16px; }
+.target-name { margin: 0; font-size: 1.5rem; font-weight: 800; line-height: 1.2; color: var(--navy); }
+.target-meta { margin: 4px 0 0; font-size: 0.9rem; color: var(--muted); }
 
 .directions { text-align: center; }
 .static-note { color: var(--muted); font-size: 0.8rem; margin: 0; }
