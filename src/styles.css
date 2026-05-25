@@ -12,6 +12,12 @@
 body { margin: 0; background: var(--bg); min-height: 100dvh; display: flex; flex-direction: column; }
 #app { flex: 1; display: flex; flex-direction: column; }
 
+.site-header {
+  background: var(--red); color: #fff; text-align: center;
+  padding: calc(10px + env(safe-area-inset-top)) 16px 10px;
+  font-size: 1.05rem; font-weight: 700; letter-spacing: 0.02em;
+}
+
 .site-footer {
   text-align: center;
   padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
