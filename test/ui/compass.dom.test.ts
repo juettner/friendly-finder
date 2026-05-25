@@ -3,10 +3,11 @@ import { describe, it, expect } from "vitest";
 import { mountCompass, setNeedle } from "../../src/ui/compass";
 
 describe("compass UI", () => {
-  it("mounts a compass with a needle", () => {
+  it("mounts a compass with a crinkled ring and a needle", () => {
     const root = document.createElement("div");
     mountCompass(root);
     expect(root.querySelector(".compass")).not.toBeNull();
+    expect(root.querySelector(".compass-ring")).not.toBeNull();
     expect(root.querySelector(".needle")).not.toBeNull();
   });
 
