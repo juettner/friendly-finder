@@ -41,6 +41,17 @@ describe("parseLocations", () => {
     expect(parseLocations("<result><locations></locations></result>")).toEqual([]);
   });
 
+  it("decodes double-encoded HTML entities in names", () => {
+    // Upstream double-encodes ampersands: "&amp;amp;" -> after XML decode -> "&amp;"
+    const xml = `<result><locations><location num="1">
+      <dba>BOTTLE HOUSE WINE &amp;amp; SPIRITS</dba><street>1 MAIN</street>
+      <city>ST PAUL</city><state>MN</state><zip>55101</zip><phone>1112223333</phone>
+      <storeTypeRollup>off</storeTypeRollup><distance>1.0</distance>
+      <lat>45.0</lat><long>-93.0</long></location></locations></result>`;
+    const [place] = parseLocations(xml);
+    expect(place.name).toBe("BOTTLE HOUSE WINE & SPIRITS");
+  });
+
   it("handles a single (non-array) location", () => {
     const single = `<result><locations><location num="1">
       <dba>SOLO BAR</dba><street>1 MAIN</street><city>X</city><state>MN</state>

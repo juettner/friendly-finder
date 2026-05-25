@@ -7,8 +7,30 @@ const parser = new XMLParser({
   trimValues: true,
 });
 
+const NAMED_ENTITIES: Record<string, string> = {
+  amp: "&",
+  lt: "<",
+  gt: ">",
+  quot: '"',
+  apos: "'",
+  nbsp: " ",
+};
+
+// Upstream double-encodes entities (e.g. "&amp;amp;"); fast-xml-parser strips
+// only the XML layer, leaving one HTML layer ("&amp;") that we decode here.
+function decodeEntities(s: string): string {
+  return s.replace(/&(#x[0-9a-fA-F]+|#\d+|[a-zA-Z]+);/g, (match, code: string) => {
+    if (code[0] === "#") {
+      const cp =
+        code[1] === "x" ? parseInt(code.slice(2), 16) : parseInt(code.slice(1), 10);
+      return Number.isFinite(cp) ? String.fromCodePoint(cp) : match;
+    }
+    return NAMED_ENTITIES[code] ?? match;
+  });
+}
+
 function str(v: unknown): string {
-  return v == null ? "" : String(v).trim();
+  return v == null ? "" : decodeEntities(String(v).trim());
 }
 
 function toType(rollup: string): PlaceType {
