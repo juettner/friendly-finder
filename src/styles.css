@@ -30,7 +30,6 @@ body { margin: 0; background: var(--bg); min-height: 100dvh; display: flex; flex
 
 .screen { flex: 1; display: flex; flex-direction: column; align-items: center; padding: 24px; }
 .landing { justify-content: center; text-align: center; gap: 12px; }
-.landing h1 { font-size: 1.9rem; margin: 0; }
 .tagline { color: var(--muted); margin: 0 0 8px; }
 
 .primary {

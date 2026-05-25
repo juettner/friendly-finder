@@ -1,7 +1,6 @@
 export function renderLanding(root: HTMLElement, onStart: () => void): void {
   root.innerHTML = `
     <section class="screen landing">
-      <h1>The Friendly Finder</h1>
       <p class="tagline">Find the nearest Grain Belt Premium.</p>
       <button type="button" class="primary start">Find me a Premium</button>
     </section>`;
