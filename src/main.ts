@@ -15,8 +15,8 @@ import { renderLanding, renderMessage } from "./ui/screens";
 
 const app = document.querySelector<HTMLDivElement>("#app")!;
 
-let userPos: LatLng;
-let target: Place;
+let userPos!: LatLng;
+let target!: Place;
 let live = false;
 let stopHeading: (() => void) | null = null;
 
@@ -62,7 +62,7 @@ function showResults(places: Place[]): void {
 }
 
 async function start(): Promise<void> {
-  app.innerHTML = `<section class="screen message"><h2 class="msg-title">Locating…</h2><p class="msg-body">Getting your position.</p></section>`;
+  renderMessage(app, { title: "Locating…", body: "Getting your position." });
   live = isOrientationSupported() && (await requestHeadingPermission());
 
   try {
