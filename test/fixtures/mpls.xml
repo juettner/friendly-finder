@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<result>
+  <custID>AUG</custID>
+  <total>3</total>
+  <locations>
+    <location num="1">
+      <dba>HUM'S LIQUOR</dba>
+      <street>2926 BRYANT AVE S</street>
+      <city>MINNEAPOLIS</city>
+      <state>MN</state>
+      <zip>55408</zip>
+      <phone>6128270961</phone>
+      <storeTypeRollup>off</storeTypeRollup>
+      <distance>0.6</distance>
+      <lat>44.948000</lat>
+      <long>-93.290000</long>
+    </location>
+    <location num="2">
+      <dba>CROOKED PINT ALE HOUSE</dba>
+      <street>501 WASHINGTON AVE</street>
+      <city>MINNEAPOLIS</city>
+      <state>MN</state>
+      <zip>55415</zip>
+      <phone>6122044534</phone>
+      <phoneFormatted>(612) 204-4534</phoneFormatted>
+      <storeTypeRollup>on</storeTypeRollup>
+      <distance>0.2</distance>
+      <lat>44.978300</lat>
+      <long>-93.260310</long>
+    </location>
+    <location num="3">
+      <dba>THE 19 BAR</dba>
+      <street>19 W 15TH ST</street>
+      <city>MINNEAPOLIS</city>
+      <state>MN</state>
+      <zip>55403</zip>
+      <phone>6128715553</phone>
+      <phoneFormatted>(612) 871-5553</phoneFormatted>
+      <storeTypeRollup>on</storeTypeRollup>
+      <distance>0.4</distance>
+      <lat>44.962000</lat>
+      <long>-93.283000</long>
+    </location>
+  </locations>
+</result>
