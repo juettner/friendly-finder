@@ -1,14 +1,36 @@
 #!/usr/bin/env node
 import * as cdk from "aws-cdk-lib";
 import { FriendlyFinderStack } from "../lib/friendly-finder-stack";
+import { FriendlyFinderCertStack } from "../lib/friendly-finder-cert-stack";
 
 const app = new cdk.App();
 
-// Account/region come from your AWS CLI profile (CDK_DEFAULT_*). CloudFront is global;
-// the bucket + Lambda live in this region (defaults to us-east-1).
+const domainName = "friendly-finder.com";
+const altNames = ["www.friendly-finder.com"];
+const hostedZoneId = "Z0997421231N06SL0JTXC";
+
+const account = process.env.CDK_DEFAULT_ACCOUNT;
+
+// CloudFront certs must be in us-east-1; this stack is pinned there and shared
+// back to the main stack via crossRegionReferences.
+const certStack = new FriendlyFinderCertStack(app, "FriendlyFinderCertStack", {
+  env: { account, region: "us-east-1" },
+  crossRegionReferences: true,
+  domainName,
+  altNames,
+  hostedZoneId,
+});
+
+// The live stack runs in us-west-2; pin it so a profile's default region can't
+// retarget the deploy to a different region. CloudFront itself is global.
 new FriendlyFinderStack(app, "FriendlyFinderStack", {
   env: {
-    account: process.env.CDK_DEFAULT_ACCOUNT,
-    region: process.env.CDK_DEFAULT_REGION ?? "us-east-1",
+    account,
+    region: "us-west-2",
   },
+  crossRegionReferences: true,
+  domainName,
+  altNames,
+  hostedZoneId,
+  certificate: certStack.certificate,
 });
