@@ -2,7 +2,7 @@ import { parseLocations } from "../lib/parse";
 import type { BarsResponse } from "../lib/types";
 
 const UPSTREAM = "https://grainbelt.com/wp-content/themes/grainbelt/inc/vip-ajax.php";
-const USER_AGENT = "BuyChadJuettnerABeer/1.0";
+const USER_AGENT = "BuyChadJuettnerBeers/1.0";
 const TIMEOUT_MS = 8000;
 
 // Minimal shape of a Lambda Function URL request/response (API Gateway v2 payload).
