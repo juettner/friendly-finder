@@ -1,0 +1,36 @@
+# XcodeGen project definition.
+#
+# Think of this file as the pom.xml: it is the small, readable source of truth,
+# and `xcodegen generate` turns it into FriendlyFinder.xcodeproj (the IDE project,
+# which is a large generated file we deliberately do NOT commit).
+#
+#   brew install xcodegen
+#   cd ios && xcodegen generate && open FriendlyFinder.xcodeproj
+name: FriendlyFinder
+options:
+  bundleIdPrefix: dev.juettner
+  deploymentTarget:
+    iOS: "17.0"
+targets:
+  FriendlyFinder:
+    type: application
+    platform: iOS
+    sources:
+      - FriendlyFinder
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: dev.juettner.friendlyfinder
+        PRODUCT_NAME: FriendlyFinder
+        MARKETING_VERSION: "0.1.0"
+        CURRENT_PROJECT_VERSION: "1"
+        # Swift 5 language mode: avoids Swift 6's strict concurrency checking,
+        # which is a lot to take on for a first Swift project.
+        SWIFT_VERSION: "5.0"
+        INFOPLIST_FILE: FriendlyFinder/Info.plist
+        GENERATE_INFOPLIST_FILE: NO
+        CODE_SIGN_ENTITLEMENTS: FriendlyFinder/FriendlyFinder.entitlements
+        CODE_SIGN_STYLE: Automatic
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        TARGETED_DEVICE_FAMILY: "1" # iPhone only
+        # DEVELOPMENT_TEAM is intentionally unset: pick your team in Xcode
+        # (target > Signing & Capabilities) so your Apple ID isn't in the repo.
