@@ -59,6 +59,7 @@ lib/        shared XML parsing + types
 api/        Vercel serverless proxy
 lambda/     AWS Lambda proxy (same idea, different cloud)
 cdk/        AWS infrastructure as code
+ios/        native CarPlay app (see ios/README.md)
 test/       proof that I tested it
 ```
 

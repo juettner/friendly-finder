@@ -14,3 +14,8 @@ cdk.context.json
 
 # tooling artifacts
 .playwright-mcp/
+
+# iOS / Xcode (project is generated from ios/project.yml by XcodeGen)
+ios/*.xcodeproj/
+ios/DerivedData/
+xcuserdata/
