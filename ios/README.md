@@ -33,13 +33,18 @@ cd ios && xcodegen generate && open FriendlyFinder.xcodeproj
 1. In Xcode, select the **FriendlyFinder** target, open **Signing &
    Capabilities**, and pick your team.
 2. Choose an iPhone simulator and press Run (⌘R).
-3. On the simulated phone, tap **Find the nearest** and allow location access.
-   This has to happen on the phone once; iOS never shows permission prompts on
-   the car screen.
-4. In the Simulator menu choose **I/O > External Displays > CarPlay**. The app
-   icon appears on the CarPlay home screen.
-5. Give the simulator a location with **Features > Location > Custom Location**
+3. Give the simulator a location with **Features > Location > Custom Location**
    (for example 44.98, -93.265 for downtown Minneapolis).
+4. On the simulated phone, tap **Find the nearest Premium** and allow location
+   access.
+
+### Seeing the car screen
+
+- **Xcode 26 and earlier:** in the Simulator menu choose **I/O > External
+  Displays > CarPlay**.
+- **Xcode 27:** the new Device Hub has no external display option for
+  simulated phones. Use a real iPhone with either Apple's **CarPlay Simulator**
+  app (in "Additional Tools for Xcode") or an actual head unit.
 
 Re-run `xcodegen generate` whenever you add, rename, or delete a file.
 
@@ -59,8 +64,9 @@ FriendlyFinder/
   App/                        the phone screen (SwiftUI)
   CarPlay/                    the car screen (CarPlay templates)
   Locator/                    location, HTTP client, data model, config
-  Assets.xcassets/            app icon and map pin artwork
+  Assets.xcassets/            app icon, logo, map pin, and brand colours
 ```
 
 To point the app at a different product, edit `Locator/LocatorConfig.swift`
-and replace the `Pin` and `AppIcon` images.
+and replace the `Pin`, `Logo` and `AppIcon` images and the `BrandRed`,
+`BrandCream` and `AccentColor` colours in `Assets.xcassets`.

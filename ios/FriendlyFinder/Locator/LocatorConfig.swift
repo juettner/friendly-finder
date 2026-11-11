@@ -12,6 +12,12 @@ enum LocatorConfig {
     /// JSON shaped like `LocatorResponse` (see Place.swift / lib/types.ts).
     static let endpoint = URL(string: "https://friendly-finder.com/api/bars")!
 
+    /// Short call to action on the phone screen's main button.
+    static let findButtonTitle = "Find the nearest Premium"
+
+    /// Name of the image in Assets.xcassets used as the header on the phone screen.
+    static let logoAssetName = "Logo"
+
     /// Name of the image in Assets.xcassets used for map pins.
     static let pinAssetName = "Pin"
 

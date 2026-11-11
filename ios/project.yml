@@ -31,6 +31,8 @@ targets:
         CODE_SIGN_ENTITLEMENTS: FriendlyFinder/FriendlyFinder.entitlements
         CODE_SIGN_STYLE: Automatic
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        # App-wide tint (buttons, links) comes from the AccentColor colour set.
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
         TARGETED_DEVICE_FAMILY: "1" # iPhone only
         # DEVELOPMENT_TEAM is intentionally unset: pick your team in Xcode
         # (target > Signing & Capabilities) so your Apple ID isn't in the repo.

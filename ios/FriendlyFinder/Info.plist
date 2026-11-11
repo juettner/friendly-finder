@@ -25,8 +25,14 @@
 	<!-- Text iOS shows in the "Allow location?" prompt. Required, or the app crashes on first request. -->
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Your location is used to find the nearest place carrying the product.</string>
+	<!-- Launch screen: the logo on the cream background while the app starts. -->
 	<key>UILaunchScreen</key>
-	<dict/>
+	<dict>
+		<key>UIColorName</key>
+		<string>BrandCream</string>
+		<key>UIImageName</key>
+		<string>Logo</string>
+	</dict>
 	<key>UISupportedInterfaceOrientations</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
