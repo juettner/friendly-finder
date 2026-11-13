@@ -62,3 +62,25 @@ describe("parseLocations", () => {
     expect(places[0].name).toBe("SOLO BAR");
   });
 });
+
+describe("parseResult", () => {
+  it("reports the upstream total alongside the places", async () => {
+    const { parseResult } = await import("../lib/parse");
+    const result = parseResult(xml);
+    expect(result.total).toBe(3);
+    expect(result.places).toHaveLength(3);
+  });
+
+  it("returns a null total for a reply that is not a locator result", async () => {
+    const { parseResult } = await import("../lib/parse");
+    expect(parseResult("<html><body>Too many requests</body></html>").total).toBeNull();
+  });
+
+  it("keeps lastSold when upstream provides it", async () => {
+    const { parseResult } = await import("../lib/parse");
+    const withLastSold = xml.replace("<dba>THE 19 BAR</dba>", "<dba>THE 19 BAR</dba><lastSold>20261015</lastSold>");
+    const places = parseResult(withLastSold).places;
+    expect(places.find((p) => p.name === "THE 19 BAR")!.lastSold).toBe("20261015");
+    expect(places.find((p) => p.name === "HUM'S LIQUOR")).not.toHaveProperty("lastSold");
+  });
+});

@@ -20,6 +20,24 @@ handful of compiler errors on the first build in Xcode.
 - For a real head unit: a paid Apple Developer account with the CarPlay
   **Driving Task** entitlement granted by Apple
 
+## Where the data comes from
+
+Inside the Minneapolis-St. Paul metro the app answers from a **mirror**: a file
+of every place in the region, stored on the phone. No network call is needed.
+Outside the metro it calls the live API (`/api/bars`) as before.
+
+The mirror reaches the phone two ways:
+
+- **Bundled at build time.** If `FriendlyFinder/Resources/places.json` exists
+  when you build, it ships inside the app. Create or update it with
+  `npm run mirror` from the repo root (about 60 paced requests, two minutes),
+  then re-run `xcodegen generate`. The file is gitignored.
+- **Downloaded.** Once a day the app checks
+  `https://friendly-finder.com/data/places.json`, which a weekly job refreshes,
+  and keeps the newer copy.
+
+Neither is required: with no mirror at all the app uses the live API everywhere.
+
 ## Build and run in the simulator
 
 ```bash
@@ -63,7 +81,8 @@ FriendlyFinder/
   FriendlyFinder.entitlements the CarPlay Driving Task entitlement
   App/                        the phone screen (SwiftUI)
   CarPlay/                    the car screen (CarPlay templates)
-  Locator/                    location, HTTP client, data model, config
+  Locator/                    location, mirror, HTTP client, data model, config
+  Resources/places.json       bundled mirror (optional, gitignored)
   Assets.xcassets/            app icon, logo, map pin, and brand colours
 ```
 

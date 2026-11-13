@@ -10,6 +10,8 @@ import * as origins from "aws-cdk-lib/aws-cloudfront-origins";
 import * as acm from "aws-cdk-lib/aws-certificatemanager";
 import * as route53 from "aws-cdk-lib/aws-route53";
 import * as targets from "aws-cdk-lib/aws-route53-targets";
+import * as events from "aws-cdk-lib/aws-events";
+import * as eventsTargets from "aws-cdk-lib/aws-events-targets";
 
 // Repo root, relative to this file (cdk/lib/ -> ../../).
 const REPO_ROOT = path.join(__dirname, "..", "..");
@@ -52,6 +54,42 @@ export class FriendlyFinderStack extends cdk.Stack {
     // Public Function URL — fronted by CloudFront so the browser hits it same-origin.
     const barsUrl = barsFn.addFunctionUrl({ authType: lambda.FunctionUrlAuthType.NONE });
 
+    // --- Mirror -------------------------------------------------------------
+    // A weekly job crawls the locator for the Twin Cities and writes one file,
+    // data/places.json, which the iOS app downloads instead of calling /api/bars.
+
+    // Separate bucket on purpose: the site deployment below prunes anything in
+    // the site bucket that isn't part of the build, which would delete the mirror.
+    const dataBucket = new s3.Bucket(this, "DataBucket", {
+      blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
+      encryption: s3.BucketEncryption.S3_MANAGED,
+      enforceSSL: true,
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
+      autoDeleteObjects: true,
+    });
+
+    const mirrorFn = new lambdaNode.NodejsFunction(this, "MirrorFn", {
+      entry: path.join(REPO_ROOT, "lambda", "mirror.ts"),
+      handler: "handler",
+      runtime: lambda.Runtime.NODEJS_22_X,
+      // About 60 paced requests take ~2 minutes; this leaves room for splitting cells.
+      timeout: cdk.Duration.minutes(10),
+      memorySize: 256,
+      projectRoot: REPO_ROOT,
+      depsLockFilePath: path.join(REPO_ROOT, "package-lock.json"),
+      bundling: { minify: true, target: "node22" },
+      environment: { DATA_BUCKET: dataBucket.bucketName, DATA_KEY: "data/places.json" },
+    });
+    dataBucket.grantPut(mirrorFn);
+
+    // The refresh schedule: Mondays 09:00 UTC (about 3-4 am Central).
+    new events.Rule(this, "MirrorSchedule", {
+      schedule: events.Schedule.cron({ minute: "0", hour: "9", weekDay: "MON" }),
+      // No automatic retries: a failed crawl should not immediately re-crawl
+      // the upstream. Last week's file stays in place until the next run.
+      targets: [new eventsTargets.LambdaFunction(mirrorFn, { retryAttempts: 0 })],
+    });
+
     // Cache /api responses keyed on lat/lng, honoring the function's Cache-Control (s-maxage).
     const apiCachePolicy = new cloudfront.CachePolicy(this, "ApiCachePolicy", {
       queryStringBehavior: cloudfront.CacheQueryStringBehavior.allowList("lat", "lng"),
@@ -81,6 +119,12 @@ export class FriendlyFinderStack extends cdk.Stack {
           viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
           allowedMethods: cloudfront.AllowedMethods.ALLOW_GET_HEAD,
           cachePolicy: apiCachePolicy,
+        },
+        // The mirror file, served straight from the data bucket.
+        "/data/*": {
+          origin: origins.S3BucketOrigin.withOriginAccessControl(dataBucket),
+          viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+          cachePolicy: cloudfront.CachePolicy.CACHING_OPTIMIZED,
         },
       },
       // SPA fallback: S3 (with OAC) returns 403 for unknown keys -> serve the app shell.
@@ -116,5 +160,7 @@ export class FriendlyFinderStack extends cdk.Stack {
     new cdk.CfnOutput(this, "SiteUrl", { value: `https://${props.domainName}` });
     new cdk.CfnOutput(this, "CloudFrontUrl", { value: `https://${distribution.distributionDomainName}` });
     new cdk.CfnOutput(this, "BucketName", { value: siteBucket.bucketName });
+    new cdk.CfnOutput(this, "MirrorFunctionName", { value: mirrorFn.functionName });
+    new cdk.CfnOutput(this, "MirrorUrl", { value: `https://${props.domainName}/data/places.json` });
   }
 }

@@ -51,13 +51,33 @@ npm run typecheck  # make TypeScript glare at me
 npm run build      # production build into dist/
 ```
 
+## The mirror
+
+The iOS app doesn't call the API inside the Minneapolis-St. Paul metro. It reads
+a mirror instead: one JSON file listing every place in the region (about 1,150
+of them).
+
+- **How it's built:** the upstream locator only answers "what's within 10 miles
+  of this point", 50 at a time, never more than 400. `lib/mirror.ts` tiles the
+  region with cells, searches each one, and splits any cell where that cap hides
+  results. A full crawl is about 60 requests, paced 1.5 seconds apart.
+- **The refresh job:** a Lambda (`lambda/mirror.ts`) runs every Monday on an
+  EventBridge schedule and writes `data/places.json` to S3, served at
+  `https://friendly-finder.com/data/places.json`. If a crawl fails or comes back
+  suspiciously small, nothing is written and last week's file stays.
+- **By hand:** `npm run mirror` runs the same crawl locally and writes the copy
+  that gets bundled into the iOS app.
+
+To mirror a different area, edit the region in `lib/mirror.ts`.
+
 ## Project structure
 
 ```
 src/        the app — compass, geolocation, bearing math, UI
 lib/        shared XML parsing + types
 api/        Vercel serverless proxy
-lambda/     AWS Lambda proxy (same idea, different cloud)
+lambda/     AWS Lambda proxy (same idea, different cloud) + the weekly mirror job
+scripts/    run the mirror crawl by hand
 cdk/        AWS infrastructure as code
 ios/        native CarPlay app (see ios/README.md)
 test/       proof that I tested it
