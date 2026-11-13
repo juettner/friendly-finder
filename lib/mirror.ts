@@ -7,7 +7,9 @@ export const PAGE_SIZE = 50; // results per page
 export const RESULT_CAP = 400; // a search never returns more than this many
 
 const UPSTREAM = "https://grainbelt.com/wp-content/themes/grainbelt/inc/vip-ajax.php";
-const USER_AGENT = "BuyChadJuettnerBeers/1.0";
+// Says who is asking and where to find them, so the site's admin can get in
+// touch rather than just block the crawl.
+const USER_AGENT = "FriendlyFinderMirror/1.0 (+https://friendly-finder.com)";
 const MILES_PER_DEG_LAT = 69.0;
 
 /** The area mirrored by default: Minneapolis, St. Paul and the surrounding suburbs. */
@@ -133,7 +135,7 @@ export async function crawlRegion(
   options: CrawlOptions = {},
 ): Promise<CrawlResult> {
   const {
-    delayMs = 1500,
+    delayMs = 4000,
     maxRequests = 300,
     cellMiles = 12,
     minCellMiles = 1,

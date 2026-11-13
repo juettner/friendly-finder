@@ -30,7 +30,7 @@ The mirror reaches the phone two ways:
 
 - **Bundled at build time.** If `FriendlyFinder/Resources/places.json` exists
   when you build, it ships inside the app. Create or update it with
-  `npm run mirror` from the repo root (about 60 paced requests, two minutes),
+  `npm run mirror` from the repo root (about 60 paced requests, four to five minutes),
   then re-run `xcodegen generate`. The file is gitignored.
 - **Downloaded.** Once a day the app checks
   `https://friendly-finder.com/data/places.json`, which a weekly job refreshes,

@@ -12,6 +12,10 @@ import * as route53 from "aws-cdk-lib/aws-route53";
 import * as targets from "aws-cdk-lib/aws-route53-targets";
 import * as events from "aws-cdk-lib/aws-events";
 import * as eventsTargets from "aws-cdk-lib/aws-events-targets";
+import * as cloudwatch from "aws-cdk-lib/aws-cloudwatch";
+import * as cloudwatchActions from "aws-cdk-lib/aws-cloudwatch-actions";
+import * as sns from "aws-cdk-lib/aws-sns";
+import * as snsSubscriptions from "aws-cdk-lib/aws-sns-subscriptions";
 
 // Repo root, relative to this file (cdk/lib/ -> ../../).
 const REPO_ROOT = path.join(__dirname, "..", "..");
@@ -72,8 +76,9 @@ export class FriendlyFinderStack extends cdk.Stack {
       entry: path.join(REPO_ROOT, "lambda", "mirror.ts"),
       handler: "handler",
       runtime: lambda.Runtime.NODEJS_22_X,
-      // About 60 paced requests take ~2 minutes; this leaves room for splitting cells.
-      timeout: cdk.Duration.minutes(10),
+      // About 60 requests, 4 seconds apart, take ~4.5 minutes. 15 minutes (the
+      // Lambda maximum) leaves room for splitting cells.
+      timeout: cdk.Duration.minutes(15),
       memorySize: 256,
       projectRoot: REPO_ROOT,
       depsLockFilePath: path.join(REPO_ROOT, "package-lock.json"),
@@ -89,6 +94,28 @@ export class FriendlyFinderStack extends cdk.Stack {
       // the upstream. Last week's file stays in place until the next run.
       targets: [new eventsTargets.LambdaFunction(mirrorFn, { retryAttempts: 0 })],
     });
+
+    // Tell a human when the mirror job fails (blocked, rate-limited, timed out,
+    // or too few places), instead of letting it fail quietly every Monday.
+    const mirrorAlerts = new sns.Topic(this, "MirrorAlerts", {
+      displayName: "Friendly Finder mirror job failures",
+    });
+    // Optional: deploy with `-c alertEmail=you@example.com` to get the alerts by
+    // email. Kept out of the code so an address isn't committed to the repo.
+    const alertEmail = this.node.tryGetContext("alertEmail") as string | undefined;
+    if (alertEmail) {
+      mirrorAlerts.addSubscription(new snsSubscriptions.EmailSubscription(alertEmail));
+    }
+    const mirrorFailed = new cloudwatch.Alarm(this, "MirrorFailedAlarm", {
+      alarmDescription: "The weekly Friendly Finder mirror crawl failed; last week's data is still being served.",
+      metric: mirrorFn.metricErrors({ period: cdk.Duration.hours(1), statistic: "Sum" }),
+      threshold: 1,
+      evaluationPeriods: 1,
+      comparisonOperator: cloudwatch.ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
+      // The job only runs weekly, so most hours have no data. That's healthy, not an alarm.
+      treatMissingData: cloudwatch.TreatMissingData.NOT_BREACHING,
+    });
+    mirrorFailed.addAlarmAction(new cloudwatchActions.SnsAction(mirrorAlerts));
 
     // Cache /api responses keyed on lat/lng, honoring the function's Cache-Control (s-maxage).
     const apiCachePolicy = new cloudfront.CachePolicy(this, "ApiCachePolicy", {
@@ -161,6 +188,7 @@ export class FriendlyFinderStack extends cdk.Stack {
     new cdk.CfnOutput(this, "CloudFrontUrl", { value: `https://${distribution.distributionDomainName}` });
     new cdk.CfnOutput(this, "BucketName", { value: siteBucket.bucketName });
     new cdk.CfnOutput(this, "MirrorFunctionName", { value: mirrorFn.functionName });
+    new cdk.CfnOutput(this, "MirrorAlertsTopicArn", { value: mirrorAlerts.topicArn });
     new cdk.CfnOutput(this, "MirrorUrl", { value: `https://${props.domainName}/data/places.json` });
   }
 }

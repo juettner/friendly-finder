@@ -60,11 +60,15 @@ of them).
 - **How it's built:** the upstream locator only answers "what's within 10 miles
   of this point", 50 at a time, never more than 400. `lib/mirror.ts` tiles the
   region with cells, searches each one, and splits any cell where that cap hides
-  results. A full crawl is about 60 requests, paced 1.5 seconds apart.
+  results. A full crawl is about 60 requests, one at a time, 4 seconds apart.
 - **The refresh job:** a Lambda (`lambda/mirror.ts`) runs every Monday on an
   EventBridge schedule and writes `data/places.json` to S3, served at
   `https://friendly-finder.com/data/places.json`. If a crawl fails or comes back
   suspiciously small, nothing is written and last week's file stays.
+- **Being a good guest:** the crawl identifies itself with a User-Agent that
+  links back to this site, stops at the first error or unexpected reply, and
+  never retries automatically. A CloudWatch alarm fires if a run fails; deploy
+  with `-c alertEmail=you@example.com` to have it emailed to you.
 - **By hand:** `npm run mirror` runs the same crawl locally and writes the copy
   that gets bundled into the iOS app.
 

@@ -50,7 +50,12 @@ export async function handler(): Promise<MirrorRunResult> {
     );
   };
 
-  const result = await runMirror(fetchUpstreamPage, put, minPlaces, { log: (m) => console.log(m) });
+  const result = await runMirror(fetchUpstreamPage, put, minPlaces, {
+    log: (m) => console.log(m),
+    // At 4 seconds apart, this many requests still fits inside the function's
+    // 15-minute limit. A normal run needs about 60.
+    maxRequests: 180,
+  });
   console.log(`published ${result.count} places to s3://${bucket}/${key} after ${result.requests} requests`);
   return result;
 }
